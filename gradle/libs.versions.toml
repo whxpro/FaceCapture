@@ -14,6 +14,7 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 face-mesh-detection = "16.0.0-beta1"
 guavaVersion = "29.0-android"
+annotationJvm = "1.8.2"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
@@ -31,6 +32,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 face-detection = { module = "com.google.mlkit:face-detection", version.ref = "faceDetection" }
 face-mesh-detection = { group = "com.google.mlkit", name = "face-mesh-detection", version.ref = "face-mesh-detection" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guavaVersion" }
+androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
