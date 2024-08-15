@@ -1,0 +1,77 @@
+/**
+ * 把XmlClassGuard生成的映射文件再映射到mapping中
+ */
+android {
+    applicationVariants.all { variant ->
+        def variantName = variant.name
+        if (variant.buildType.name == "debug") {
+            return
+        }
+        def taskName = "parseXmlClassGuard${variantName.capitalize()}"
+        tasks.register(taskName) {
+            dependsOn "minify${variantName.capitalize()}WithR8"
+            doLast {
+                def guardMappingFile = file("xml-class-mapping.txt")
+                if (!guardMappingFile.exists()) {
+                    project.logger.warn("xmlClassGuard mapping file is not exist")
+                    return
+                }
+
+                def classMap = new HashMap<String, String>()
+                def startParsing = false
+                guardMappingFile.eachLine { line ->
+                    if (startParsing) {
+                        def splits = line.trim().split(" -> ")
+                        classMap[splits[1]] = splits[0]
+                        project.logger.debug("parse guard mapping: ${splits[0]} -> ${splits[1]}")
+                    } else if (line.contains("class mapping:")) {
+                        startParsing = true
+                    }
+                }
+
+                def mappingFile = file("${project.buildDir.absolutePath}/outputs/mapping/${variantName}/mapping.txt")
+                if (!mappingFile.exists()) {
+                    project.logger.warn("$variantName mapping file is not exist")
+                    return
+                }
+
+                def tempFile = File.createTempFile("temp", "txt")
+                tempFile.withWriter { writer ->
+                    def obfuscateClassName = ""
+                    def realClassName = ""
+                    def shouldParseClassInfo = false
+                    mappingFile.eachLine { line ->
+                        def newLine = line
+                        if (line.contains(" -> ") && line.endsWith(":")) {
+                            def splits = line.substring(0, line.length() - 1).split(" -> ")
+                            def realAbsoluteClassName = classMap[splits[0]]
+                            if (realAbsoluteClassName != null) {
+                                newLine = "${realAbsoluteClassName} -> ${splits[1]}:"
+                                obfuscateClassName = splits[0].substring(splits[0].lastIndexOf(".") + 1)
+                                realClassName = realAbsoluteClassName.substring(realAbsoluteClassName.lastIndexOf(".") + 1)
+                                shouldParseClassInfo = true
+                                project.logger.info("replace mapping line: $line to $newLine")
+                                project.logger.debug("currentClassName: $obfuscateClassName, realClassName: $realClassName")
+                            }
+                        } else if (shouldParseClassInfo && line.startsWith("# ") && line.contains("fileName")) {
+                            newLine = line.replace(obfuscateClassName, realClassName)
+                            shouldParseClassInfo = false
+                            project.logger.info("replace class info line: $line to $newLine")
+                        }
+                        writer.writeLine(newLine)
+                    }
+                }
+
+                mappingFile.delete()
+                tempFile.renameTo(mappingFile)
+            }
+        }
+
+//        project.afterEvaluate {
+//            // 确保在bugsnag的上传任务之前执行
+//            project.tasks.named("uploadBugsnag${variant.flavorName.capitalize()}-${variant.buildType.name}Mapping") {
+//                dependsOn taskName
+//            }
+//        }
+    }
+}

@@ -1,7 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("xml-class-guard")
 }
+apply("${rootProject.projectDir}/opt/stringfog.gradle")
+
+xmlClassGuard {
+    //用于增量混淆的 mapping 文件
+    val f = file("${project.buildDir.absolutePath}/intermediates/xml_class_guard/xml-class-mapping.txt")
+    f.parentFile.mkdirs()
+    mappingFile = f
+}
+
+apply("${rootProject.projectDir}/opt/xmlclassguard.gradle")
 
 android {
     namespace = "com.facecapture.prod"
@@ -11,10 +22,8 @@ android {
         applicationId = "com.facecapture.prod"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionCode = 10000
+        versionName = "1.0.0"
     }
 
     signingConfigs {
