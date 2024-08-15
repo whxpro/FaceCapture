@@ -17,12 +17,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    signingConfigs {
+        create("release") {
+            storeFile = file("../sign/user.keystore")
+            storePassword = "capture001"
+            keyAlias = "faceCapture"
+            keyPassword = "faceCapture"
         }
     }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig =  signingConfigs.getByName("release")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

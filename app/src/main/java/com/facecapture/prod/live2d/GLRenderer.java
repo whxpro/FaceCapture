@@ -28,6 +28,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     // Called repeatedly for drawing.
     @Override
     public void onDrawFrame(GL10 unused) {
-        LAppDelegate.getInstance().run();
+        LAppDelegate.getInstance().onDrawFrame();
     }
 }

@@ -51,6 +51,9 @@ public class LAppModel extends CubismUserModel {
         idParamBodyAngleX = idManager.getId(ParameterId.BODY_ANGLE_X.getId());
         idParamEyeBallX = idManager.getId(ParameterId.EYE_BALL_X.getId());
         idParamEyeBallY = idManager.getId(ParameterId.EYE_BALL_Y.getId());
+        idParamMouthOpenY = idManager.getId(ParameterId.MOUTH_OPEN_Y.getId());
+        idLeftEye = idManager.getId(ParameterId.EYE_L_OPEN.getId());
+        idRightEye = idManager.getId(ParameterId.EYE_R_OPEN.getId());
     }
 
     public void loadAssets(final String dir, final String fileName) {
@@ -96,8 +99,8 @@ public class LAppModel extends CubismUserModel {
         userTimeSeconds += deltaTimeSeconds;
 
         faceController.update(deltaTimeSeconds);
-        faceX = faceController.getX();
-        faceY = faceController.getY();
+        faceX = LAppDelegate.angleX; //faceController.getX();
+        faceY = LAppDelegate.angleY; //faceController.getY();
 
         // モーションによるパラメーター更新の有無
         boolean isMotionUpdated = false;
@@ -135,16 +138,21 @@ public class LAppModel extends CubismUserModel {
 
         // ドラッグ追従機能
         // ドラッグによる顔の向きの調整
-        model.addParameterValue(idParamAngleX, faceX * 30); // -30から30の値を加える
-        model.addParameterValue(idParamAngleY, faceY * 30);
-//        model.addParameterValue(idParamAngleZ, faceX * faceY * (30));
+        model.addParameterValue(idParamAngleX, faceX); // -30から30の値を加える
+        model.addParameterValue(idParamAngleY, faceY);
+        model.addParameterValue(idParamAngleZ, faceX * faceY);
 
         // ドラッグによる体の向きの調整
-        model.addParameterValue(idParamBodyAngleX, faceX * 10); // -10から10の値を加える
+//        model.addParameterValue(idParamBodyAngleX, faceX * 10); // -10から10の値を加える
 
         // ドラッグによる目の向きの調整
         model.addParameterValue(idParamEyeBallX, faceX);  // -1から1の値を加える
         model.addParameterValue(idParamEyeBallY, faceY);
+
+        model.addParameterValue(idParamMouthOpenY, LAppDelegate.mouthY);
+
+        model.addParameterValue(idLeftEye, LAppDelegate.leftEyeOpenProbability);
+        model.addParameterValue(idRightEye, LAppDelegate.rightEyeOpenProbability);
 
         // Breath Function
         if (breath != null) {
@@ -670,6 +678,12 @@ public class LAppModel extends CubismUserModel {
      * パラメーターID: ParamEyeBallY
      */
     private final CubismId idParamEyeBallY;
+
+
+    private final CubismId idParamMouthOpenY;
+
+    private final CubismId idLeftEye;
+    private final CubismId idRightEye;
 
     /**
      * フレームバッファ以外の描画先

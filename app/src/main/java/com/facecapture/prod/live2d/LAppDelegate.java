@@ -21,8 +21,12 @@ import static android.opengl.GLES20.glClearDepthf;
 
 import android.app.Activity;
 import android.opengl.GLES20;
+import android.util.Log;
 
+import com.live2d.sdk.cubism.framework.CubismDefaultParameterId;
 import com.live2d.sdk.cubism.framework.CubismFramework;
+import com.live2d.sdk.cubism.framework.id.CubismId;
+import com.live2d.sdk.cubism.framework.model.CubismModel;
 
 public class LAppDelegate {
     public static LAppDelegate getInstance() {
@@ -106,7 +110,15 @@ public class LAppDelegate {
         isActive = true;
     }
 
-    public void run() {
+    public static float angleX = 0;
+    public static float angleY = 0;
+
+    public static float mouthY = 0;
+
+    public static float leftEyeOpenProbability = 0;
+    public static float rightEyeOpenProbability = 0;
+
+    public void onDrawFrame() {
         // 時間更新
         LAppPal.updateTime();
 

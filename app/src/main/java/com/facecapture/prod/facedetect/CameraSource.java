@@ -33,7 +33,6 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 
-import com.facecapture.prod.preference.PreferenceUtils;
 import com.google.android.gms.common.images.Size;
 
 import java.io.IOException;
@@ -304,7 +303,7 @@ public class CameraSource {
     }
     Camera camera = Camera.open(requestedCameraId);
 
-    SizePair sizePair = PreferenceUtils.getCameraPreviewSizePair(activity, requestedCameraId);
+    SizePair sizePair = null;
     if (sizePair == null) {
       sizePair =
           selectSizePair(

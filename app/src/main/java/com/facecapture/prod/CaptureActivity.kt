@@ -21,13 +21,13 @@ import com.facecapture.prod.facedetect.OnFaceDetectListener
 import com.facecapture.prod.live2d.GLRenderer
 import com.facecapture.prod.live2d.LAppDelegate
 import com.facecapture.prod.live2d.LAppLive2DManager
-import com.facecapture.prod.preference.PreferenceUtils
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceContour
 import com.google.mlkit.vision.face.FaceLandmark
 import com.live2d.sdk.cubism.framework.CubismDefaultParameterId
 import com.live2d.sdk.cubism.framework.CubismFramework
 import java.io.IOException
+import java.util.Locale
 import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.atan2
@@ -108,10 +108,8 @@ class CaptureActivity  : AppCompatActivity(), OnFaceDetectListener {
         if (cameraSource == null) {
             cameraSource = CameraSource(this, mBinding.overlay)
         }
-
-        val faceDetectorOptions = PreferenceUtils.getFaceDetectorOptions(this)
         cameraSource!!.setMachineLearningFrameProcessor(
-            FaceDetectorProcessor(this, faceDetectorOptions, this)
+            FaceDetectorProcessor(this, this)
         )
         cameraSource!!.setFacing(CameraSource.CAMERA_FACING_FRONT)
     }
@@ -136,23 +134,26 @@ class CaptureActivity  : AppCompatActivity(), OnFaceDetectListener {
 
     override fun onFaceDetect(face: Face?) {
         face ?: return
-        solveFacePose(face.getLandmark(FaceLandmark.LEFT_EYE)?.position,
-            face.getLandmark(FaceLandmark.RIGHT_EYE)?.position,
-            face.getLandmark(FaceLandmark.NOSE_BASE)?.position,
-            face.getLandmark(FaceLandmark.MOUTH_LEFT)?.position,
-            face.getLandmark(FaceLandmark.MOUTH_RIGHT)?.position
-        )
+//        solveFacePose(face.getLandmark(FaceLandmark.LEFT_EYE)?.position,
+//            face.getLandmark(FaceLandmark.RIGHT_EYE)?.position,
+//            face.getLandmark(FaceLandmark.NOSE_BASE)?.position,
+//            face.getLandmark(FaceLandmark.MOUTH_LEFT)?.position,
+//            face.getLandmark(FaceLandmark.MOUTH_RIGHT)?.position
+//        )
 
-//        openMouth(face)
+        openMouth(face)
+        winkEye(face)
+
         face.getContour(FaceContour.UPPER_LIP_BOTTOM)?.points
 
         val angleY = face.headEulerAngleY
-        val x = cos(angleY) / 2
+        LAppDelegate.angleX = -angleY
 
-        val angleZ = face.headEulerAngleZ
-        val y = cos(angleZ) / 2
+        val angleZ = face.headEulerAngleX
+        LAppDelegate.angleY = angleZ
 
-        Log.d(TAG, "onDrag: x: $x, y: $y")
+
+//        Log.d(TAG, "onDrag: x: $x, y: $y")
 
 //        LAppLive2DManager.getInstance().onDrag(x, y)
     }
@@ -253,7 +254,9 @@ class CaptureActivity  : AppCompatActivity(), OnFaceDetectListener {
 
         Log.d(TAG, "Yaw: $yaw Pitch: $pitch Roll: $roll")
 
-        LAppLive2DManager.getInstance().onDrag(-pitch.toFloat(), roll.toFloat())
+        LAppDelegate.angleX = -(String.format("%.1f", pitch, Locale.US).toFloat())
+        LAppDelegate.angleY = String.format("%.1f", roll, Locale.US).toFloat()
+
     }
 
     private fun openMouth(face: Face) {
@@ -279,15 +282,16 @@ class CaptureActivity  : AppCompatActivity(), OnFaceDetectListener {
         val width = mouthRight.x - mouthLeft.x
         val height = mouthBottom.y - (mouthLeft.y + mouthRight.y) / 2
 
-        val threshold = width * 0.1
+        val threshold = width * 0.23
 
         Log.d(TAG, "width: $width, height: $height, open: ${height > threshold}")
 
-        if (height > threshold) {
-            val model = LAppLive2DManager.getInstance().currentModel
-            model.model.addParameterValue(CubismFramework.getIdManager().getId(CubismDefaultParameterId.ParameterId.MOUTH_OPEN_Y.id), 160f, 0.75f)
-            model.model.addParameterValue(CubismFramework.getIdManager().getId(CubismDefaultParameterId.ParameterId.MOUTH_FORM.id), 160f, 0.75f)
-        }
+        LAppDelegate.mouthY = if (height > threshold) 1f else 0f
+    }
+
+    private fun winkEye(face: Face) {
+        LAppDelegate.leftEyeOpenProbability = face.leftEyeOpenProbability ?: return
+        LAppDelegate.rightEyeOpenProbability = face.rightEyeOpenProbability ?: return
     }
 
     @Suppress("DEPRECATION")

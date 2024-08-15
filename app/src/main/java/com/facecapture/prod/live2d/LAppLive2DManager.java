@@ -14,6 +14,7 @@ import static com.facecapture.prod.live2d.LAppDefine.USE_RENDER_TARGET;
 import com.facecapture.prod.live2d.LAppDefine.*;
 
 import android.content.res.AssetManager;
+import android.util.Pair;
 
 import com.live2d.sdk.cubism.framework.math.CubismMatrix44;
 import com.live2d.sdk.cubism.framework.motion.ACubismMotion;
@@ -22,6 +23,7 @@ import com.live2d.sdk.cubism.framework.motion.IFinishedMotionCallback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -63,16 +65,21 @@ public class LAppLive2DManager {
             String[] root = assets.list("");
             for (String subdir: root) {
                 String[] files = assets.list(subdir);
-                String target = subdir + ".model3.json";
+//                String target = subdir + ".model3.json";
                 // フォルダと同名の.model3.jsonがあるか探索する
                 for (String file : files) {
-                    if (file.equals(target)) {
-                        modelDir.add(subdir);
+                    if (file.contains(".model3.json")) {
+                        modelDir.add(new Pair<>(subdir, file));
                         break;
                     }
                 }
             }
-            Collections.sort(modelDir);
+            Collections.sort(modelDir, new Comparator<Pair<String, String>>() {
+                @Override
+                public int compare(Pair<String, String> o1, Pair<String, String> o2) {
+                    return o1.first.compareTo(o2.first);
+                }
+            });
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         }
@@ -184,10 +191,10 @@ public class LAppLive2DManager {
             LAppPal.printLog("model index: " + currentModelIndex);
         }
 
-        String modelDirName = modelDir.get(index);
+        Pair<String, String> modelDirName = modelDir.get(index);
 
-        String modelPath = ResourcePath.ROOT.getPath() + modelDirName + "/";
-        String modelJsonName = modelDirName + ".model3.json";
+        String modelPath = ResourcePath.ROOT.getPath() + modelDirName.first + "/";
+        String modelJsonName = modelDirName.second;
 
         releaseAllModel();
 
@@ -296,7 +303,7 @@ public class LAppLive2DManager {
     /**
      * モデルディレクトリ名
      */
-    private final List<String> modelDir = new ArrayList<>();
+    private final List<Pair<String, String>> modelDir = new ArrayList<>();
 
     // onUpdateメソッドで使用されるキャッシュ変数
     private final CubismMatrix44 viewMatrix = CubismMatrix44.create();

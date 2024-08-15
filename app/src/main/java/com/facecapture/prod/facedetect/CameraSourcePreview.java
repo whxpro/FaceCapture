@@ -26,9 +26,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
-import com.facecapture.prod.preference.PreferenceUtils;
 import com.google.android.gms.common.images.Size;
-
 
 import java.io.IOException;
 
@@ -86,7 +84,7 @@ public class CameraSourcePreview extends ViewGroup {
 
   private void startIfReady() throws IOException, SecurityException {
     if (startRequested && surfaceAvailable) {
-      if (PreferenceUtils.isCameraLiveViewportEnabled(context)) {
+      if (false) {
         cameraSource.start(surfaceView.getHolder());
       } else {
         cameraSource.start();
