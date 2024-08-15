@@ -9,6 +9,9 @@ xmlClassGuard {
     //用于增量混淆的 mapping 文件
     val f = file("${project.buildDir.absolutePath}/intermediates/xml_class_guard/xml-class-mapping.txt")
     f.parentFile.mkdirs()
+    if (!f.exists()) {
+        f.createNewFile()
+    }
     mappingFile = f
 }
 
