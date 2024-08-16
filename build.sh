@@ -11,11 +11,14 @@ buildType=$1
 
 if [ "$buildType" == "google" ]; then
   echo "build google"
-  ./gradlew clean xmlClassGuardRelease bundleRelease
+  ./gradlew clean && \
+  ./gradlew xmlClassGuardRelease bundleRelease
 elif [ "$buildType" == "release" ]; then
   echo "build release"
-  ./gradlew clean xmlClassGuardRelease assembleRelease
+  ./gradlew clean && \
+  ./gradlew xmlClassGuardRelease assembleRelease
 else
   echo "build debug"
-  ./gradlew clean xmlClassGuardRelease assembleDebug
+  ./gradlew clean && \
+  ./gradlew xmlClassGuardRelease assembleDebug
 fi
