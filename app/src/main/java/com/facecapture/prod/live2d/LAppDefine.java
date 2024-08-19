@@ -121,7 +121,7 @@ public class LAppDefine {
         /**
          * Background image file
          */
-        BACK_IMAGE("back_class_normal.png"),
+        BACK_IMAGE("scene_bg.png"),
         /**
          * Gear image file
          */
